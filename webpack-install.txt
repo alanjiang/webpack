@@ -22,6 +22,12 @@ npm的背后，是基于couchdb的一个数据库，详细记录了每个包的�
 
 B: webpack 安装及helloworld入门知识
 
+官方介绍及参考文献：
+
+https://webpack.js.org/concepts/targets/#usage
+https://segmentfault.com/a/1190000006178770
+
+https://segmentfault.com/a/1190000012789253 (vue+webpack)
 1, global install
 
 $npm install -g webpack
@@ -111,6 +117,206 @@ document.querySelector("#root").appendChild(greeter());
  
  
  浏览器访问： index.html 
+ 
+ C: 使用webpack.config.js 配置，无需要命令行打包：
+ 
+ 1, webpack.config.js 文件如下：
+ 
+ module.exports = {
+  entry:  __dirname + "/app/main.js",//已多次提及的唯一入口文件
+  output: {
+    path: __dirname + "/public",//打包后的文件存放的地方
+    filename: "bundle.js"//打包后输出文件的文件名
+  }
+}
+ 
+ 或者官方的示例：
+ 
+const path = require('path');
+module.exports = {
+  entry: __dirname + "/app/main.js",
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js'
+  }
+};
+ 
+ 
+ 
+ 注：
+  entry:__dirname+"/app/main.js" 
+  是
+  entry: {
+    main: __dirname+"/app/main.js" 
+  } 的简写。
+  
+  (1) __dirname: node.js中的一个全局变量，它指向当前执行脚本所在的目录。
+  (2) entry: 唯一入口文件,默认的index.js 文件
+  (3) output: 打包后的文件存放的地方
+  (4) filename: 打包后输出文件的文件名
+  
+  (5) Loaders: 出了容器，webpack只能理解JavaScript 和 JSON 文件。
+           Loaders允许webpack处理别的类型的文件，并把它们转换成能够被应用消费的合法模块。
+           加入到别的依赖中。Loaders有test, use两个属性
+  
+            The test property identifies which file or files should be transformed.
+             The use property indicates which loader should be used to do the transforming.
+
+  实例1： 使用css-loader处理.css文件。使用ts-loader处理.ts文件。
+  module.exports = {
+  module: {
+    rules: [
+      {test: /\.css$/, use: 'css-loader'},
+      {test: /\.ts$/, use: 'ts-loader'}
+    ]
+  }
+};
+  
+  实例2：官方：
+  
+const path = require('path');
+module.exports = {
+  output: {
+    filename: 'my-first-webpack.bundle.js'
+  },
+  module: {
+    rules: [
+      { test: /\.txt$/, use: 'raw-loader' }
+    ]
+  }
+};
+  
+ 说明： 当你使用 require()/import 声明一个txt文件时 ，在将文件加到bundle之前，使用 raw-loader转换。
+
+ 在webpack.config.js文件中配置打包的益处在于，出异常时会产生警告。  
+ 
+ 
+ (6) Plugins:
+ 
+ 
+ 
+const HtmlWebpackPlugin = require('html-webpack-plugin'); //installed via npm
+const webpack = require('webpack'); //to access built-in plugins
+
+module.exports = {
+  module: {
+    rules: [
+      { test: /\.txt$/, use: 'raw-loader' }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({template: './src/index.html'})
+  ]
+};
+
+上面的例子, html-webpack-plugin通过自动注入你所生成的bundle生成HTML文件。
+
+(7)mode : production|development|none
+
+module.exports = {
+  mode: 'production'
+};
+ 
+ 2, 直接运行： 
+ $cd /Users/zhangxiao/eclipse-workspace/webpack/
+ 
+ $node_modules/.bin/webpack --mode=production
+ 
+ D, npm start 打包 webpack 
+ 
+ 1,  修改 package.json , 修改： "scripts": { "start": "webpack" }
+ 
+ {
+  "name": "webpack-sample",
+  "version": "1.0.0",
+  "description": "a demo for webpack",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack" 
+  },
+  "author": "alan",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+     
+}
+ 
+ 2，执行： $ npm start
+ 
+ 
+ E, webpack 的调试功能 
+ 
+ devtool: 'eval-source-map'
+ cheap-module-eval-source-map方法构建速度更快，但是不利于调试，推荐在大型项目考虑时间成本时使用。
+ 
+ 1，修改 webpack.config.js
+ 
+ module.exports = {
+  devtool: 'eval-source-map',
+  entry:  __dirname + "/app/main.js",//已多次提及的唯一入口文件
+  output: {
+    path: __dirname + "/public",//打包后的文件存放的地方
+    filename: "bundle.js"//打包后输出文件的文件名
+    
+  },
+  mode: 'production'
+}
+ 
+ 2, 使用webpack构建本地服务器
+ 
+$ npm install --save-dev webpack-dev-server
+
+
+3, 修改配置文件webpack.config.js
+
+module.exports = {
+  devtool: 'eval-source-map',
+  entry:  __dirname + "/app/main.js",//已多次提及的唯一入口文件
+  output: {
+    path: __dirname + "/public",//打包后的文件存放的地方
+    filename: "bundle.js"//打包后输出文件的文件名
+    
+  },
+  mode: 'production',
+  
+  devServer: {
+	    contentBase: "./public",//本地服务器所加载的页面所在的目录
+	    historyApiFallback: true,//不跳转
+	    inline: true//实时刷新
+	} 
+  
+}
+
+4, 在package.json中的scripts对象中添加如下命令，用以开启本地服务器：
+    "server": "webpack-dev-server --open"
+新的内容如下：
+{
+  "name": "webpack-sample",
+  "version": "1.0.0",
+  "description": "a demo for webpack",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack",
+    "server": "webpack-dev-server --open"
+  },
+  "author": "alan",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+  
+     
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
   
   
