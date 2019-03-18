@@ -69,7 +69,7 @@ $npm install --save-dev webpack
     }
 
 5, 创建app, public 两个folder, app 中存放js文件， 
-6，创建index.html, Gratter.js, Main.js
+6，创建index.html, Greetter.js, Main.js
 
 (1) index.html 文件如下： 
 <!-- index.html -->
@@ -85,4 +85,32 @@ $npm install --save-dev webpack
     <script src="bundle.js"></script>
   </body>
 </html>
+
+(2) Greeter.js
+
+module.exports = function() {
+  var greet = document.createElement('div');
+  greet.textContent = "Hi there and greetings!";
+  return greet;
+};
+
+
+(3) main.js
+
+const greeter = require('./Greeter.js');
+document.querySelector("#root").appendChild(greeter());
+
+ 7, webpack 打包项目 
+ 
+ 
+ $cd /Users/zhangxiao/eclipse-workspace/webpack/
+ 
+ $node_modules/.bin/webpack app/main.js -o public/bundle.js --mode=production
+ 
+  运行打包命令后，可以看见，public目录下生成了一个bundle.js 文件。
+ 
+ 
+ 浏览器访问： index.html 
+ 
+  
   
